@@ -4,10 +4,12 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-fun getGitHash(): String {
-	return providers.exec {
+fun getGitHash(): String = try {
+	providers.exec {
 		commandLine("git", "rev-parse", "--short", "HEAD")
 	}.standardOutput.asText.get().trim()
+} catch (e: Exception) {
+	"0.0.0-SNAPSHOT"
 }
 
 group = "kr.hhplus.be"
