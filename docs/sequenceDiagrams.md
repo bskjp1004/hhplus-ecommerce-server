@@ -51,6 +51,7 @@ sequenceDiagram
     participant Payment
     participant OrderRepository
     participant Balance
+    participant 외부 데이터플랫폼
 
     유저->>OrderController: POST /orders/{userId} { ... }
     OrderController->>OrderService: 주문 요청
@@ -72,6 +73,7 @@ sequenceDiagram
         Balance-->>Payment: 차감 완료
         note over OrderService: 트랜잭션 커밋
         Payment-->>OrderService: 결제 완료
+        OrderService->>외부 데이터플랫폼: 주문 정보 외부 플랫폼으로 전송
         OrderService-->>OrderController: 성공
         OrderController-->>유저: 200 OK
     end
