@@ -10,4 +10,4 @@
     - `[잔액이력]`은 `[유저]`와 직접 관련 있으니 `FK`설정
   - 클러스터 인덱스 설정 테이블: `[주문]`, `[주문상품]`
   
-![image](./images/hhplus-ecommerce-2025-07-15T23_49_35.png)
+![image](./images/hhplus-ecommerce-2025-07-17T17_10_49.png)

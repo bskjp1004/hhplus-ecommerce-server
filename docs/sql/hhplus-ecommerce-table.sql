@@ -51,10 +51,11 @@ CREATE TABLE coupon_policy (
     remaining_count INT NOT NULL COMMENT '잔여수량'
 ) COMMENT='쿠폰정책';
 
-CREATE TABLE coupon_issue_history (
+CREATE TABLE user_coupon (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'PK',
     coupon_policy_id BIGINT NOT NULL COMMENT '쿠폰정책ID',
     user_id BIGINT NOT NULL COMMENT '유저ID',
     issued_at DATETIME NOT NULL COMMENT '발급일시',
+    status ENUM('ISSUED', 'USED') NOT NULL COMMENT '쿠폰상태',
     FOREIGN KEY (coupon_policy_id) REFERENCES coupon_policy(coupon_policy_id)
-) COMMENT='쿠폰발급이력';
+) COMMENT='유저 쿠폰 소유 및 사용 이력';
