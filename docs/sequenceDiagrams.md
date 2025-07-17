@@ -65,7 +65,7 @@ sequenceDiagram
     alt 잔액 부족
         Payment-->>OrderService: 결제 실패
         OrderService-->>OrderController: 실패 응답
-        OrderController-->>유저: 400 Bad Request
+        OrderController-->>유저: 잔액 부족(400 Bad Request)
     else 결제 가능
         Payment->>OrderRepository: 주문 저장
         Payment->>Balance: 잔액 차감 요청
@@ -75,7 +75,7 @@ sequenceDiagram
         Payment-->>OrderService: 결제 완료
         OrderService->>외부 데이터플랫폼: 주문 정보 외부 플랫폼으로 전송
         OrderService-->>OrderController: 성공
-        OrderController-->>유저: 200 OK
+        OrderController-->>유저: 주문 및 결제 성공(200 OK)
     end
 ```
 
