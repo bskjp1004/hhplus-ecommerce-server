@@ -50,6 +50,7 @@ sequenceDiagram
     participant OrderService
     participant Payment
     participant OrderRepository
+    participant Coupon
     participant Balance
     participant 외부 데이터플랫폼
 
@@ -67,10 +68,11 @@ sequenceDiagram
         OrderService-->>OrderController: 실패 응답
         OrderController-->>유저: 잔액 부족(400 Bad Request)
     else 결제 가능
-        Payment->>OrderRepository: 주문 저장
-        Payment->>Balance: 잔액 차감 요청
+        Payment->>OrderRepository: 주문 생성
+        Payment->>Coupon: 쿠폰 사용 생성
+        Payment->>Balance: 잔액 차감 업데이트
         note over Balance: 동시성 제어에 의해 중복 차감 방지
-        Balance-->>Payment: 차감 완료
+        Balance-->>Payment: 잔액 차감 완료
         note over OrderService: 트랜잭션 커밋
         Payment-->>OrderService: 결제 완료
         OrderService->>외부 데이터플랫폼: 주문 정보 외부 플랫폼으로 전송
