@@ -47,6 +47,9 @@ dependencies {
 	testImplementation("org.testcontainers:mysql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0")
+
+	compileOnly("org.projectlombok:lombok:1.18.36")
+	annotationProcessor("org.projectlombok:lombok:1.18.36")
 }
 
 tasks.withType<Test> {
