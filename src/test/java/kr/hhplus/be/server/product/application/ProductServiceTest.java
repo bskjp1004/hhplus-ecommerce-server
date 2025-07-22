@@ -9,6 +9,7 @@ import java.util.Optional;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.product.domain.ProductRepository;
 import kr.hhplus.be.server.product.infra.ProductRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +20,7 @@ import org.mockito.Mockito;
 @DisplayName("ProductService 테스트")
 public class ProductServiceTest {
 
-    private ProductRepositoryImpl productRepository;
+    private ProductRepository productRepository;
     private ProductService productService;
 
     @BeforeEach

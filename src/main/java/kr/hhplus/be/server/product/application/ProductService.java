@@ -3,7 +3,7 @@ package kr.hhplus.be.server.product.application;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.product.domain.Product;
-import kr.hhplus.be.server.product.infra.ProductRepositoryImpl;
+import kr.hhplus.be.server.product.domain.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final ProductRepositoryImpl productRepository;
+    private final ProductRepository productRepository;
 
     public Product getProduct(long productId){
         return productRepository.findById(productId)
