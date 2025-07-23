@@ -9,14 +9,14 @@ import kr.hhplus.be.server.product.domain.ProductRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ProductRepositoryImpl implements ProductRepository {
+public class ProductInMemoryRepository implements ProductRepository {
 
     // region
     /**
      * TODO - 실제 DB 연결 후 삭제하기
      * */
     private final Map<Long, Product> storage = new HashMap<>();
-    public ProductRepositoryImpl() {
+    public ProductInMemoryRepository() {
         storage.put(1L, Product.builder().id(1L).price(new BigDecimal("1000")).stock(10L).build());
         storage.put(2L, Product.builder().id(2L).price(new BigDecimal("1500")).stock(5L).build());
     }
