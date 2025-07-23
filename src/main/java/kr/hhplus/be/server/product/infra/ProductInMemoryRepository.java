@@ -14,6 +14,13 @@ public class ProductInMemoryRepository implements ProductRepository {
 
     @Override
     public Optional<Product> findById(long productId) {
-        return Optional.of(storage.get(productId));
+        return Optional.of(storage.get(productId).toDomain());
+    }
+
+    @Override
+    public Product save(Product product) {
+        ProductEntity productEntity = ProductEntity.fromDomain(product);
+        storage.put(product.getId(), productEntity);
+        return storage.get(product.getId()).toDomain();
     }
 }
