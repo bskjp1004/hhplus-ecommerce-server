@@ -1,20 +1,7 @@
 package kr.hhplus.be.server.product.application;
 
-import kr.hhplus.be.server.config.error.BusinessException;
-import kr.hhplus.be.server.config.error.ErrorCode;
-import kr.hhplus.be.server.product.domain.Product;
-import kr.hhplus.be.server.product.domain.ProductRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 
-@Service
-@RequiredArgsConstructor
-public class ProductService {
-
-    private final ProductRepository productRepository;
-
-    public Product getProduct(long productId){
-        return productRepository.findById(productId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
+public interface ProductService {
+    ProductResponseDto getProduct(long productId);
 }
