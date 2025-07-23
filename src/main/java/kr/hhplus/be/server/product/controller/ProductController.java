@@ -1,8 +1,7 @@
 package kr.hhplus.be.server.product.controller;
 
-import kr.hhplus.be.server.product.controller.dto.ProductResponse;
-import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.application.ProductService;
+import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +20,9 @@ public class ProductController {
     private final ProductService pointService;
 
     @GetMapping("{id}")
-    public ResponseEntity<ProductResponse> getProduct(
+    public ResponseEntity<ProductResponseDto> getProduct(
         @PathVariable long id
     ) {
-        Product product = pointService.getProduct(id);
-        return ResponseEntity.ok(ProductResponse.from(product));
+        return ResponseEntity.ok(pointService.getProduct(id));
     }
 }
