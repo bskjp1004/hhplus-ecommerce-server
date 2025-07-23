@@ -8,9 +8,10 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
+import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.ProductRepository;
-import kr.hhplus.be.server.product.infra.ProductRepositoryImpl;
+import kr.hhplus.be.server.product.infra.ProductInMemoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,13 +26,13 @@ public class ProductServiceTest {
 
     @BeforeEach
     void setUp(){
-        productRepository = Mockito.mock(ProductRepositoryImpl.class);
-        productService = new ProductService(productRepository);
+        productRepository = Mockito.mock(ProductInMemoryRepository.class);
+        productService = new ProductServiceAdapter(productRepository);
     }
 
     @Nested
     @DisplayName("상품 조회 시")
-    class GetProduct{
+    class 상품_조회_시{
 
         @Test
         @DisplayName("상품이 존재하면 정상적으로 조회된다")
@@ -45,11 +46,11 @@ public class ProductServiceTest {
             Mockito.when(productRepository.findById(productId))
                 .thenReturn(Optional.of(mockProduct));
 
-            Product product = productService.getProduct(productId);
+            ProductResponseDto product = productService.getProduct(productId);
 
             assertAll(
                 ()->assertThat(product).isNotNull(),
-                ()->assertThat(product.getId()).isEqualTo(productId)
+                ()->assertThat(product.id()).isEqualTo(productId)
             );
         }
 
