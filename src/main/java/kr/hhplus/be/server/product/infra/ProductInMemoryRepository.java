@@ -18,7 +18,7 @@ public class ProductInMemoryRepository implements ProductRepository {
     }
 
     @Override
-    public Product save(Product product) {
+    public Product insertOrUpdate(Product product) {
         ProductEntity productEntity = ProductEntity.fromDomain(product);
         storage.put(product.getId(), productEntity);
         return storage.get(product.getId()).toDomain();
