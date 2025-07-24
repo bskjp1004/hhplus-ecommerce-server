@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.user.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.math.BigDecimal;
@@ -45,9 +45,8 @@ public class UserTest {
         void 요청_금액이_음수나_0이면_실패(BigDecimal amount){
             User user = User.empty();
 
-            assertThrows(UserDomainException.IllegalAmountException.class, () -> {
-                user.chargeBalance(amount);
-            });
+            assertThatThrownBy(() -> user.chargeBalance(amount))
+                .isInstanceOf(UserDomainException.IllegalAmountException.class);
         }
 
         @Test
@@ -56,9 +55,8 @@ public class UserTest {
             BigDecimal amount = BigDecimal.valueOf(10_000_001);
             User user = User.empty();
 
-            assertThrows(UserDomainException.ExceedMaxBalanceException.class, () -> {
-                user.chargeBalance(amount);
-            });
+            assertThatThrownBy(() -> user.chargeBalance(amount))
+                .isInstanceOf(UserDomainException.ExceedMaxBalanceException.class);
         }
     }
 }

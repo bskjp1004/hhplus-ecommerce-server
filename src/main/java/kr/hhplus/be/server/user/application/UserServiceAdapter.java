@@ -1,11 +1,10 @@
 package kr.hhplus.be.server.user.application;
 
-import java.util.Optional;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.user.application.dto.UserResponseDto;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.domain.port.UserRepository;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,8 +22,8 @@ public class UserServiceAdapter implements UserService{
 
         User updatedUser = originalUser.chargeBalance(amount);
 
-        userRepository.insertOrUpdate(updatedUser);
+        User persistedUser = userRepository.insertOrUpdate(updatedUser);
 
-        return UserResponseDto.from(updatedUser);
+        return UserResponseDto.from(persistedUser);
     }
 }

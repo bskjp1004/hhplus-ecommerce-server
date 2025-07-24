@@ -1,10 +1,11 @@
 package kr.hhplus.be.server.user.infra;
 
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.domain.port.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import kr.hhplus.be.server.user.infra.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository

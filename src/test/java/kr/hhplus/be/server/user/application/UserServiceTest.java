@@ -9,7 +9,7 @@ import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.user.application.dto.UserResponseDto;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.domain.port.UserRepository;
 import java.math.BigDecimal;
 import java.util.Optional;
 import kr.hhplus.be.server.user.domain.exception.UserDomainException;
@@ -72,14 +72,14 @@ public class UserServiceTest {
         void 존재하지_않는_유저면_실패(){
             long userId = 1L;
             BigDecimal requestAmount = BigDecimal.valueOf(1_000L);
+
             Mockito.when(userRepository.findById(userId))
                 .thenReturn(Optional.empty());
 
-            BusinessException exception = assertThrows(BusinessException.class, () -> {
-                userService.chargeBalance(userId, requestAmount);
-            });
-
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
+            assertThatThrownBy(() -> userService.chargeBalance(userId, requestAmount))
+                .isInstanceOf(BusinessException.class)
+                    .extracting(e -> ((BusinessException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.USER_NOT_FOUND);
         }
 
         @ParameterizedTest
@@ -91,7 +91,6 @@ public class UserServiceTest {
         void 요청_금액이_유효하지않으면_실패(BigDecimal requestAmount){
             long userId = 1L;
             BigDecimal originalBalance = BigDecimal.ZERO;
-
             User originalUser = User.builder()
                 .id(userId)
                 .balance(originalBalance)
