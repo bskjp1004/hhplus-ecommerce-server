@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.product.infra;
+package kr.hhplus.be.server.product.infra.entity;
 
 import kr.hhplus.be.server.product.domain.Product;
 import jakarta.persistence.Entity;
@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 public class ProductEntity {
     private long id;
     private BigDecimal price;
-    private long stock;
+    private Integer stock;
 
     public Product toDomain() {
         return Product.builder()
