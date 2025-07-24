@@ -1,13 +1,11 @@
 package kr.hhplus.be.server.product.infra;
 
 import kr.hhplus.be.server.product.domain.Product;
+import jakarta.persistence.Entity;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Entity
 @AllArgsConstructor
 public class ProductEntity {
     private long id;
