@@ -11,24 +11,24 @@ import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.ProductRepository;
-import kr.hhplus.be.server.product.infra.ProductInMemoryRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("ProductService 테스트")
 public class ProductServiceTest {
 
+    @Mock
     private ProductRepository productRepository;
-    private ProductService productService;
 
-    @BeforeEach
-    void setUp(){
-        productRepository = Mockito.mock(ProductInMemoryRepository.class);
-        productService = new ProductServiceAdapter(productRepository);
-    }
+    @InjectMocks
+    private ProductServiceAdapter productService;
 
     @Nested
     @DisplayName("상품 조회 시")
