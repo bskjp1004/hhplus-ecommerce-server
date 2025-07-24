@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.product.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -8,9 +9,10 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
+import kr.hhplus.be.server.order.application.dto.OrderItemRequestDto;
 import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
-import kr.hhplus.be.server.product.domain.ProductRepository;
+import kr.hhplus.be.server.product.domain.port.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,7 +43,7 @@ public class ProductServiceTest {
             Product mockProduct = Product.builder()
                 .id(productId)
                 .price(BigDecimal.ZERO)
-                .stock(0L)
+                .stock(0)
                 .build();
             Mockito.when(productRepository.findById(productId))
                 .thenReturn(Optional.of(mockProduct));
@@ -66,6 +68,52 @@ public class ProductServiceTest {
             });
 
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("상품 재고 차감 시")
+    class 상품_재고_차감_시{
+        @Test
+        @DisplayName("정상적으로 차감된다")
+        void 정상적으로_차감(){
+            long productId = 1L;
+            Integer originalStock = 20;
+            Integer requestStock = 2;
+            Integer updatedStock = originalStock - requestStock;
+            OrderItemRequestDto requests = new OrderItemRequestDto(productId, requestStock);
+            Product mockProduct = Product.builder()
+                .id(productId)
+                .price(BigDecimal.valueOf(2000))
+                .stock(originalStock)
+                .build();
+
+            Mockito.when(productRepository.findById(productId))
+                .thenReturn(Optional.of(mockProduct));
+            Mockito.when(productRepository.insertOrUpdate(Mockito.any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+            Product productResponseDto = productService.decreaseProductStock(requests);
+
+            assertAll(
+                ()->assertThat(productResponseDto).isNotNull(),
+                ()->assertThat(productResponseDto.getStock()).isEqualTo(updatedStock)
+            );
+        }
+
+        @Test
+        @DisplayName("상품이 존재하지 않으면 실패한다")
+        void 상품이_존재하지_않으면_실패(){
+            long productId = 1L;
+            Integer requestStock = 2;
+            OrderItemRequestDto requests = new OrderItemRequestDto(productId, requestStock);
+            Mockito.when(productRepository.findById(productId))
+                .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> productService.decreaseProductStock(requests))
+                .isInstanceOf(BusinessException.class)
+                .extracting(e -> ((BusinessException) e).getErrorCode())
+                .isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
         }
     }
 }
