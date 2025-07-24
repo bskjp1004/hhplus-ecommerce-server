@@ -19,10 +19,10 @@ public class ProductController {
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService pointService;
 
-    @GetMapping("{id}")
+    @GetMapping("{productId}")
     public ResponseEntity<ProductResponseDto> getProduct(
-        @PathVariable long id
+        @PathVariable long productId
     ) {
-        return ResponseEntity.ok(pointService.getProduct(id));
+        return ResponseEntity.ok(pointService.getProduct(productId));
     }
 }
