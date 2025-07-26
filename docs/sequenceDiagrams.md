@@ -45,40 +45,44 @@ sequenceDiagram
 ## 주문/결제
 ```mermaid
 sequenceDiagram
-    actor 유저
-    participant OrderController
-    participant OrderService
-    participant Payment
-    participant OrderRepository
-    participant Coupon
-    participant Balance
-    participant 외부 데이터플랫폼
+  actor 유저
+  participant OrderController
+  participant OrderFacade
+  participant ProductService
+  participant CouponService
+  participant UserService
+  participant OrderService
+  participant 외부 데이터플랫폼
 
-    유저->>OrderController: POST /orders/{userId} { ... }
-    OrderController->>OrderService: 주문 요청
+  유저->>OrderController: POST /orders/{userId} { ... }
+  OrderController->>OrderFacade: 주문 요청
+  OrderFacade->>ProductService: 상품 재고 확인
+  ProductService-->>OrderFacade: 상품 재고 응답
 
-    note over OrderService,Balance: 트랜잭션 시작
-    OrderService->>Balance: 잔액 조회 (동시성 제어, Pessimistic Lock)
-
-    Balance-->>OrderService: 잔액 반환
-
-    OrderService->>Payment: 결제 가능 여부 확인
+  alt 상품 재고 부족
+    OrderFacade-->>OrderController: 주문/결제 실패 응답
+    OrderController-->>유저: 재고 부족(400 Bad Request)
+  else
+    OrderFacade->>CouponService: 쿠폰 유효성 확인 및 할인 금액 조회
+    CouponService-->>OrderFacade: 할인 금액 응답
+    OrderFacade->>UserService: 잔액 조회
+    UserService-->>OrderFacade: 잔액 반환
+    OrderFacade->>OrderFacade: 결제 가능 여부 확인
     alt 잔액 부족
-        Payment-->>OrderService: 결제 실패
-        OrderService-->>OrderController: 실패 응답
-        OrderController-->>유저: 잔액 부족(400 Bad Request)
+      OrderFacade-->>OrderController: 주문/결제 실패 응답
+      OrderController-->>유저: 잔액 부족(400 Bad Request)
     else 결제 가능
-        Payment->>OrderRepository: 주문 생성
-        Payment->>Coupon: 쿠폰 사용 생성
-        Payment->>Balance: 잔액 차감 업데이트
-        note over Balance: 동시성 제어에 의해 중복 차감 방지
-        Balance-->>Payment: 잔액 차감 완료
-        note over OrderService: 트랜잭션 커밋
-        Payment-->>OrderService: 결제 완료
-        OrderService->>외부 데이터플랫폼: 주문 정보 외부 플랫폼으로 전송
-        OrderService-->>OrderController: 성공
-        OrderController-->>유저: 주문 및 결제 성공(200 OK)
+      note over OrderFacade: 트랜젝션 시작
+      OrderFacade->>ProductService: 재고 차감 업데이트
+      OrderFacade->>CouponService: 쿠폰 사용 생성
+      OrderFacade->>UserService: 잔액 차감 업데이트
+      OrderFacade->>OrderService: 주문 생성
+      note over OrderFacade: 트랜젝션 커밋
+      OrderFacade-->>OrderController: 주문/결제 성공
+      OrderController-->>유저: 주문/결제 성공(200 OK)
+      OrderFacade->>외부 데이터플랫폼: 주문 정보 외부 플랫폼으로 전송
     end
+  end
 ```
 
 ## 쿠폰 발급
