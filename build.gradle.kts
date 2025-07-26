@@ -46,7 +46,14 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+
+	// Docs
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0")
+
+	// Lombok
+	compileOnly("org.projectlombok:lombok:1.18.36")
+	annotationProcessor("org.projectlombok:lombok:1.18.36")
 }
 
 tasks.withType<Test> {
