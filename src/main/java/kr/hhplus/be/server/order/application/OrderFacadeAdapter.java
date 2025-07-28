@@ -14,7 +14,6 @@ import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.order.domain.port.OrderRepository;
 import kr.hhplus.be.server.coupon.application.CouponService;
 import kr.hhplus.be.server.product.application.ProductService;
-import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
