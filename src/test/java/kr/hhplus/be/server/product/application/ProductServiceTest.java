@@ -30,7 +30,7 @@ public class ProductServiceTest {
     private ProductRepository productRepository;
 
     @InjectMocks
-    private ProductServiceAdapter productService;
+    private ProductService productService;
 
     @Nested
     @DisplayName("상품 조회 시")

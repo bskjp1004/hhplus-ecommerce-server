@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import kr.hhplus.be.server.config.error.BusinessException;
-import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.coupon.application.dto.UserCouponResponseDto;
 import kr.hhplus.be.server.coupon.domain.CouponStatus;
 import kr.hhplus.be.server.coupon.domain.UserCoupon;
@@ -30,7 +28,7 @@ public class CouponServiceTest {
     private UserCouponRepository userCouponRepository;
 
     @InjectMocks
-    private CouponServiceAdapter couponService;
+    private CouponService couponService;
 
     @Nested
     @DisplayName("발급된 쿠폰 사용 시")

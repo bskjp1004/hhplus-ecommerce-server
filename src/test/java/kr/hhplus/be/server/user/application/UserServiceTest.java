@@ -33,7 +33,7 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserServiceAdapter userService;
+    private UserService userService;
 
     @Nested
     @DisplayName("잔액 충전 시")
