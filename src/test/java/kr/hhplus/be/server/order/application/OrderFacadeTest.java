@@ -4,27 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.util.List;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.coupon.application.CouponService;
-import kr.hhplus.be.server.coupon.domain.CouponPolicy;
-import kr.hhplus.be.server.coupon.domain.CouponStatus;
-import kr.hhplus.be.server.coupon.domain.UserCoupon;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequestDto;
-import kr.hhplus.be.server.order.application.dto.OrderRequestDto;
-import kr.hhplus.be.server.order.application.dto.OrderResponseDto;
-import kr.hhplus.be.server.order.domain.Order;
+import kr.hhplus.be.server.order.application.dto.OrderResult;
+import kr.hhplus.be.server.order.application.dto.CreateOrderCommand;
+import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
 import kr.hhplus.be.server.order.domain.OrderItem;
-import kr.hhplus.be.server.order.domain.port.OrderRepository;
 import kr.hhplus.be.server.product.application.ProductService;
-import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
-import kr.hhplus.be.server.product.domain.exception.ProductDomainException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class OrderFacadeTest {
 
     @Mock
-    private OrderRepository orderRepository;
+    private OrderService orderService;
 
     @Mock
     private CouponService couponService;
@@ -48,7 +39,7 @@ public class OrderFacadeTest {
     private ProductService productService;
 
     @InjectMocks
-    private OrderFacadeAdapter orderFacade;
+    private OrderFacade orderFacade;
 
     @Nested
     @DisplayName("주문 및 결제 요청 시")
@@ -59,15 +50,14 @@ public class OrderFacadeTest {
         void 정상적인_요청인_경우_성공(){
             // given
             long userId = 1L;
-            long couponPolicyId = 10L;
             long userCouponId = 10L;
             long productId = 100L;
             int quantity = 2;
             BigDecimal price = BigDecimal.valueOf(1000);
             BigDecimal discountRate = BigDecimal.valueOf(0.1);
 
-            OrderItemRequestDto itemDto = new OrderItemRequestDto(productId, quantity);
-            OrderRequestDto requestDto = new OrderRequestDto(userId, userCouponId, List.of(itemDto));
+            var itemCommand = new OrderItemCommand(productId, quantity);
+            var command = new CreateOrderCommand(userId, userCouponId, List.of(itemCommand));
 
             Product product = Product.builder()
                 .id(productId)
@@ -75,68 +65,69 @@ public class OrderFacadeTest {
                 .stock(10)
                 .build();
 
-            Mockito.when(productService.decreaseProductStocks(List.of(itemDto)))
-                .thenReturn(List.of(product));
-
-            UserCoupon userCoupon = UserCoupon.builder()
-                .id(userCouponId)
-                .couponPolicyId(couponPolicyId)
-                .userId(userId)
-                .issuedAt(null)
-                .status(CouponStatus.ISSUED)
-                .build();
-
-            Mockito.when(couponService.getCouponDomain(userCouponId)).thenReturn(userCoupon);
-
-            CouponPolicy policy = CouponPolicy.builder()
-                .id(couponPolicyId)
-                .discountRate(discountRate)
-                .totalCount(100)
-                .remainingCount(10)
-                .build();
-
-            Mockito.when(couponService.getCouponPolicyDomain(couponPolicyId)).thenReturn(policy);
-
             OrderItem orderItem = OrderItem.builder()
                 .productId(productId)
                 .productPrice(price)
                 .quantity(quantity)
                 .build();
 
-            Order expectedOrder = Order.create(userId, userCouponId, discountRate, List.of(orderItem));
+            OrderResult expectedResult = new OrderResult(
+                1L, userId, userCouponId, null, 
+                BigDecimal.valueOf(2000), discountRate, BigDecimal.valueOf(1800), 
+                List.of()
+            );
 
-            Mockito.when(orderRepository.insertOrUpdate(any(Order.class)))
-                .thenReturn(expectedOrder);
+            // mock 설정
+            Mockito.when(couponService.applyCouponForOrder(userCouponId))
+                .thenReturn(discountRate);
+            
+            Mockito.when(productService.decreaseProductStocks(List.of(itemCommand)))
+                .thenReturn(List.of(product));
+            
+            Mockito.when(orderService.createOrderItems(List.of(itemCommand), List.of(product)))
+                .thenReturn(List.of(orderItem));
+            
+            Mockito.when(orderService.createOrder(any(), any(), any()))
+                .thenReturn(expectedResult);
 
-            // When
-            OrderResponseDto result = orderFacade.placeOrderWithPayment(requestDto);
+            // when
+            OrderResult result = orderFacade.placeOrderWithPayment(command);
 
-            // Then
+            // then
             assertAll(
                 () -> assertThat(result).isNotNull(),
                 () -> assertThat(result.userId()).isEqualTo(userId),
-                () -> assertThat(result.orderItems()).hasSize(expectedOrder.getOrderItems().size())
+                () -> assertThat(result).isEqualTo(expectedResult)
             );
         }
 
         @Test
         @DisplayName("상품 재고가 부족한 경우 예외를 던진다")
         void 상품_재고_부족_시_예외() {
+            // given
             long userId = 1L;
             long productId = 100L;
             int quantity = 10;
 
-            OrderRequestDto request = new OrderRequestDto(
+            var itemCommand = new OrderItemCommand(productId, quantity);
+            var command = new CreateOrderCommand(
                 userId,
                 0L,
-                List.of(new OrderItemRequestDto(productId, quantity))
+                List.of(itemCommand)
             );
 
-            assertThatThrownBy(() -> orderFacade.placeOrderWithPayment(request))
+            // mock 설정: 쿠폰 처리는 성공하지만 상품 재고 차감에서 실패
+            Mockito.when(couponService.applyCouponForOrder(0L))
+                .thenReturn(BigDecimal.ZERO);
+            
+            Mockito.when(productService.decreaseProductStocks(List.of(itemCommand)))
+                .thenThrow(new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            // when & then
+            assertThatThrownBy(() -> orderFacade.placeOrderWithPayment(command))
                 .isInstanceOf(BusinessException.class)
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
-
         }
     }
 }

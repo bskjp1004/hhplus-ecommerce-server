@@ -46,9 +46,16 @@ public class CouponService {
         return UserCouponResponseDto.from(persistedUserCoupon);
     }
 
-public interface CouponService {
-    CouponPolicy getCouponPolicyDomain(long couponPolicyId);
-    UserCoupon getCouponDomain(long userCouponId);
-    UserCouponResponseDto getCoupon(long userCouponId);
-    UserCouponResponseDto useCoupon(long userCouponId);
+    @Transactional
+    public BigDecimal applyCouponForOrder(long couponId) {
+        if (couponId <= 0) {
+            return BigDecimal.ZERO;
+        }
+        
+        UserCoupon userCoupon = getCouponDomain(couponId);
+        useCoupon(userCoupon.getId());
+        
+        CouponPolicy couponPolicy = getCouponPolicyDomain(userCoupon.getCouponPolicyId());
+        return couponPolicy.getDiscountRate();
+    }
 }

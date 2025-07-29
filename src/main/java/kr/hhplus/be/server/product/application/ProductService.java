@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.product.application;
 
 import java.util.List;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequestDto;
+import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
 import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
@@ -35,10 +35,22 @@ public class ProductService {
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-public interface ProductService {
-    Product getProductDomain(long productId);
-    List<Product> getProductDomains(List<Long> productIds);
-    ProductResponseDto getProduct(long productId);
-    Product decreaseProductStock(OrderItemRequestDto request);
-    List<Product> decreaseProductStocks(List<OrderItemRequestDto> requests);
+    @Transactional
+    public Product decreaseProductStock(OrderItemCommand command) {
+        Product originalProduct = productRepository.findById(command.productId())
+            .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Product updatedProduct = originalProduct.decreaseStock(command.quantity());
+
+        Product persistedProduct = productRepository.insertOrUpdate(updatedProduct);
+
+        return persistedProduct;
+    }
+
+    @Transactional
+    public List<Product> decreaseProductStocks(List<OrderItemCommand> commands) {
+        return commands.stream()
+            .map(this::decreaseProductStock)
+            .toList();
+    }
 }
