@@ -49,7 +49,7 @@ dependencies {
 	testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 
 	// Docs
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
 	// Lombok
 	compileOnly("org.projectlombok:lombok:1.18.36")
