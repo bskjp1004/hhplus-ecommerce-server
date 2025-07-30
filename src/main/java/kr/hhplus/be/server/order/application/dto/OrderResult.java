@@ -4,19 +4,20 @@ import kr.hhplus.be.server.order.domain.Order;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.lang.Nullable;
 
-public record OrderResponseDto(
+public record OrderResult(
     long id,
     long userId,
-    long couponId,
+    @Nullable Long couponId,
     LocalDateTime orderedAt,
     BigDecimal totalPrice,
     BigDecimal discountRate,
     BigDecimal paidPrice,
-    List<OrderItemResponseDto>orderItems
+    List<OrderItemResult>orderItems
 ) {
-    public static OrderResponseDto from(Order order){
-        return new OrderResponseDto(
+    public static OrderResult from(Order order){
+        return new OrderResult(
             order.getId(),
             order.getUserId(),
             order.getCouponId(),
@@ -25,7 +26,7 @@ public record OrderResponseDto(
             order.getDiscountRate(),
             order.getPaidPrice(),
             order.getOrderItems().stream()
-                .map(OrderItemResponseDto::from)
+                .map(OrderItemResult::from)
                 .toList()
         );
     }

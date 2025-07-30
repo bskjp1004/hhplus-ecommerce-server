@@ -1,20 +1,21 @@
 package kr.hhplus.be.server;
 
 import jakarta.annotation.PreDestroy;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
+import org.junit.jupiter.api.DisplayName;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Configuration
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
 	public static final MySQLContainer<?> MYSQL_CONTAINER;
 
 	static {
 		MYSQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8.0"))
+			.withInitScript("hhplus-ecommerce-table.sql")
 			.withDatabaseName("hhplus")
 			.withUsername("test")
 			.withPassword("test");

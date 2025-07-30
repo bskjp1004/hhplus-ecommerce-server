@@ -6,13 +6,14 @@ import java.util.List;
 import kr.hhplus.be.server.order.domain.exception.OrderDomainException;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.lang.Nullable;
 
 @Getter
-
 public class Order {
-    private final long id;
-    private final long userId;
-    private final long couponId;
+    private final Long id;
+    private final Long userId;
+    @Nullable
+    private final Long couponId;
     private final LocalDateTime orderedAt;
     private final BigDecimal totalPrice;
     private final BigDecimal discountRate;
@@ -20,7 +21,7 @@ public class Order {
     private final List<OrderItem> orderItems;
 
     @Builder
-    private Order(long id, long userId, long couponId,
+    private Order(Long id, Long userId, @Nullable Long couponId,
         LocalDateTime orderedAt, BigDecimal totalPrice,
         BigDecimal discountRate, BigDecimal paidPrice, List<OrderItem> orderItems){
         this.id = id;
@@ -33,7 +34,7 @@ public class Order {
         this.orderItems = orderItems;
     }
 
-    public static Order create(long userId, long couponId, BigDecimal discountRate, List<OrderItem> orderItems){
+    public static Order create(Long userId, @Nullable Long couponId, BigDecimal discountRate, List<OrderItem> orderItems){
         if (orderItems == null || orderItems.isEmpty()){
             throw new OrderDomainException.EmptyOrderItemsException();
         }

@@ -1,8 +1,10 @@
 package kr.hhplus.be.server.order.controller;
 
 import kr.hhplus.be.server.order.application.OrderFacade;
-import kr.hhplus.be.server.order.application.dto.OrderRequestDto;
-import kr.hhplus.be.server.order.application.dto.OrderResponseDto;
+import kr.hhplus.be.server.order.application.dto.CreateOrderCommand;
+import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
+import kr.hhplus.be.server.order.application.dto.OrderResult;
+import kr.hhplus.be.server.order.controller.dto.OrderCreateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +20,16 @@ public class OrderController {
     private final OrderFacade orderFacade;
 
     @PostMapping("/order")
-    public ResponseEntity<OrderResponseDto> getProduct(
-        @RequestBody OrderRequestDto requestDto
+    public ResponseEntity<OrderResult> getProduct(
+        @RequestBody OrderCreateRequest requestDto
     ) {
-        return ResponseEntity.ok(orderFacade.placeOrderWithPayment(requestDto));
+        CreateOrderCommand command = new CreateOrderCommand(
+            requestDto.userId(),
+            requestDto.couponId(),
+            requestDto.orderItems().stream()
+                .map(item -> new OrderItemCommand(item.productId(), item.quantity()))
+                .toList()
+        );
+        return ResponseEntity.ok(orderFacade.placeOrderWithPayment(command));
     }
 }
