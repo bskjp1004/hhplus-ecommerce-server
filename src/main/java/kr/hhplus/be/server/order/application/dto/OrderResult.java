@@ -4,11 +4,12 @@ import kr.hhplus.be.server.order.domain.Order;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.lang.Nullable;
 
 public record OrderResult(
     long id,
     long userId,
-    long couponId,
+    @Nullable Long couponId,
     LocalDateTime orderedAt,
     BigDecimal totalPrice,
     BigDecimal discountRate,

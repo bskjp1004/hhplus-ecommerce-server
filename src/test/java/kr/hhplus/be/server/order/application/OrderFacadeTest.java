@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
@@ -16,6 +17,8 @@ import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
 import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.product.application.ProductService;
 import kr.hhplus.be.server.product.domain.Product;
+import kr.hhplus.be.server.user.application.UserService;
+import kr.hhplus.be.server.user.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,9 @@ public class OrderFacadeTest {
     @Mock
     private ProductService productService;
 
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private OrderFacade orderFacade;
 
@@ -53,11 +59,21 @@ public class OrderFacadeTest {
             long userCouponId = 10L;
             long productId = 100L;
             int quantity = 2;
-            BigDecimal price = BigDecimal.valueOf(1000);
+            BigDecimal price = BigDecimal.valueOf(1_000);
             BigDecimal discountRate = BigDecimal.valueOf(0.1);
+            BigDecimal totalPrice = price.multiply(BigDecimal.valueOf(quantity));
+            BigDecimal discountPrice = totalPrice
+                .multiply(discountRate)
+                .setScale(2, RoundingMode.HALF_UP);
+            BigDecimal paidPrice = totalPrice.subtract(discountPrice);
 
             var itemCommand = new OrderItemCommand(productId, quantity);
             var command = new CreateOrderCommand(userId, userCouponId, List.of(itemCommand));
+
+            User user = User.builder()
+                .id(userId)
+                .balance(BigDecimal.valueOf(200))
+                .build();
 
             Product product = Product.builder()
                 .id(productId)
@@ -72,8 +88,8 @@ public class OrderFacadeTest {
                 .build();
 
             OrderResult expectedResult = new OrderResult(
-                1L, userId, userCouponId, null, 
-                BigDecimal.valueOf(2000), discountRate, BigDecimal.valueOf(1800), 
+                1L, userId, userCouponId, null,
+                totalPrice, discountRate, paidPrice,
                 List.of()
             );
 
@@ -89,6 +105,9 @@ public class OrderFacadeTest {
             
             Mockito.when(orderService.createOrder(any(), any(), any()))
                 .thenReturn(expectedResult);
+
+            Mockito.when(userService.useBalance(userId, paidPrice))
+                .thenReturn(user);
 
             // when
             OrderResult result = orderFacade.placeOrderWithPayment(command);

@@ -8,7 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.user.application.dto.UserResponseDto;
+import kr.hhplus.be.server.user.domain.BalanceHistory;
 import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.user.domain.port.BalanceHistoryRepository;
 import kr.hhplus.be.server.user.domain.port.UserRepository;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -31,6 +33,9 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private BalanceHistoryRepository balanceHistoryRepository;
 
     @InjectMocks
     private UserService userService;
@@ -56,6 +61,9 @@ public class UserServiceTest {
                 .thenReturn(Optional.of(originalUser));
 
             Mockito.when(userRepository.insertOrUpdate(Mockito.any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+            Mockito.when(balanceHistoryRepository.insertOrUpdate(Mockito.any(BalanceHistory.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
             UserResponseDto updatedUserDto = userService.chargeBalance(userId, requestAmount);

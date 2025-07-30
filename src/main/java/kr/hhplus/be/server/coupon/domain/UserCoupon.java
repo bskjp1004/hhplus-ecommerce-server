@@ -24,7 +24,7 @@ public class UserCoupon {
         this.status = status;
     }
 
-    public UserCoupon create(long couponPolicyId, long userId){
+    public static UserCoupon create(long couponPolicyId, long userId){
         LocalDateTime nowDateTime = LocalDateTime.now();
         return UserCoupon.builder()
             .couponPolicyId(couponPolicyId)
@@ -43,6 +43,10 @@ public class UserCoupon {
             throw new CouponDomainException.AlreadyUsedCouponException();
         }
         return UserCoupon.builder()
+            .id(this.id)
+            .couponPolicyId(this.couponPolicyId)
+            .userId(this.userId)
+            .issuedAt(this.issuedAt)
             .status(CouponStatus.USED)
             .build();
     }
