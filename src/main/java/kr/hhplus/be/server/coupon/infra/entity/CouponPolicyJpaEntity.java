@@ -18,7 +18,7 @@ import lombok.Setter;
 @Table(name = "coupon_policy")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor()
 @AllArgsConstructor
 public class CouponPolicyJpaEntity {
     @Id

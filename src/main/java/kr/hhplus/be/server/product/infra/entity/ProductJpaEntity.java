@@ -18,7 +18,7 @@ import lombok.Setter;
 @Table(name = "product")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor()
 @AllArgsConstructor
 public class ProductJpaEntity {
     @Id

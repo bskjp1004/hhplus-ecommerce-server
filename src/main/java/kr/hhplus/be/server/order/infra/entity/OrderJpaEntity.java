@@ -26,7 +26,7 @@ import lombok.Setter;
 @Table(name = "`order`")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor()
 @AllArgsConstructor
 @Builder
 public class OrderJpaEntity {
