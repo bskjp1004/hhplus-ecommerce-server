@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.product.application.dto;
 
-import kr.hhplus.be.server.order.application.dto.OrderItemRequestDto;
-import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.product.domain.Product;
 import java.math.BigDecimal;
 

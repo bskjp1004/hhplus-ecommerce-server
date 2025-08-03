@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    
     @PatchMapping("{userId}/balance")
     public ResponseEntity<UserResponseDto> chargeBalance(
         @PathVariable long userId,

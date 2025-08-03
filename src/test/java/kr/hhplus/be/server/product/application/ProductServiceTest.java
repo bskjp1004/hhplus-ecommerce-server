@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
-import kr.hhplus.be.server.order.application.dto.OrderItemRequestDto;
+import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
 import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
@@ -30,7 +30,7 @@ public class ProductServiceTest {
     private ProductRepository productRepository;
 
     @InjectMocks
-    private ProductServiceAdapter productService;
+    private ProductService productService;
 
     @Nested
     @DisplayName("상품 조회 시")
@@ -81,7 +81,7 @@ public class ProductServiceTest {
             Integer originalStock = 20;
             Integer requestStock = 2;
             Integer updatedStock = originalStock - requestStock;
-            OrderItemRequestDto requests = new OrderItemRequestDto(productId, requestStock);
+            var requests = new OrderItemCommand(productId, requestStock);
             Product mockProduct = Product.builder()
                 .id(productId)
                 .price(BigDecimal.valueOf(2000))
@@ -106,7 +106,7 @@ public class ProductServiceTest {
         void 상품이_존재하지_않으면_실패(){
             long productId = 1L;
             Integer requestStock = 2;
-            OrderItemRequestDto requests = new OrderItemRequestDto(productId, requestStock);
+            var requests = new OrderItemCommand(productId, requestStock);
             Mockito.when(productRepository.findById(productId))
                 .thenReturn(Optional.empty());
 
