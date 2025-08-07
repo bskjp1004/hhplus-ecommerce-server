@@ -35,6 +35,25 @@ public class CouponService {
     }
 
     @Transactional
+    public UserCouponResponseDto issueLimitedCoupon(long userId, long couponPolicyId){
+        CouponPolicy couponPolicy = couponPolicyRepository.findById(couponPolicyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_POLICY_NOT_FOUND));
+
+        if (!couponPolicy.canIssue())
+        {
+            throw new BusinessException(ErrorCode.COUPON_OUT_OF_STOCK);
+        }
+
+        couponPolicyRepository.insertOrUpdate(couponPolicy.issue());
+
+        UserCoupon userCoupon = UserCoupon.create(couponPolicy.getId(), userId);
+
+        UserCoupon persistedUserCoupon = userCouponRepository.insertOrUpdate(userCoupon);
+
+        return UserCouponResponseDto.from(persistedUserCoupon);
+    }
+
+    @Transactional
     public UserCouponResponseDto useCoupon(long userCouponId) {
         UserCoupon issuedUserCoupon = userCouponRepository.findById(userCouponId)
             .orElseThrow(() -> new BusinessException(ErrorCode.COUPON_NOT_FOUND));

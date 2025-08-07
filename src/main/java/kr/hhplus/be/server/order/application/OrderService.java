@@ -11,6 +11,7 @@ import kr.hhplus.be.server.order.domain.port.OrderRepository;
 import kr.hhplus.be.server.product.domain.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public OrderResult createOrder(CreateOrderCommand command, BigDecimal discountRate, List<OrderItem> orderItems) {
         Order order = Order.create(
             command.userId(),
