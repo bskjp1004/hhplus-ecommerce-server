@@ -93,8 +93,7 @@ public class UserCouponJpaEntity {
   - `product` [상품] 테이블 재고차감 조회 시 비관적 락 적용
 ```java
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select c from ProductJpaEntity c where c.id = :id")
-    Optional<ProductJpaEntity> findByIdWithLock(@Param("id") long id);
+    Optional<ProductJpaEntity> findOneById(long id);
 ```
 
 
@@ -106,8 +105,7 @@ public class UserCouponJpaEntity {
 public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select u from UserJpaEntity u where u.id = :id")
-    Optional<UserJpaEntity> findByIdWithLock(@Param("id") Long id);
+    Optional<UserJpaEntity> findOneById(Long id);
 }
 ```
 
@@ -120,8 +118,7 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
 public interface CouponPolicyJpaRepository extends JpaRepository<CouponPolicyJpaEntity, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select c from CouponPolicyJpaEntity c where c.id = :id")
-    Optional<CouponPolicyJpaEntity> findByIdWithLock(@Param("id") Long id);
+    Optional<CouponPolicyJpaEntity> findOneById(Long id);
 }
 ```
 

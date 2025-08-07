@@ -19,7 +19,7 @@ public class ProductJpaRepositoryAdapter implements ProductRepository {
 
     @Override
     public Optional<Product> findById(long productId) {
-        return jpaRepository.findByIdWithLock(productId)
+        return jpaRepository.findOneById(productId)
             .map(ProductJpaEntity::toDomain);
     }
 

@@ -17,7 +17,7 @@ public class CouponPolicyJpaRepositoryAdapter implements CouponPolicyRepository 
 
     @Override
     public Optional<CouponPolicy> findById(long id) {
-        return jpaRepository.findByIdWithLock(id)
+        return jpaRepository.findOneById(id)
             .map(CouponPolicyJpaEntity::toDomain);
     }
 
