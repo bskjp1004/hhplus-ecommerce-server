@@ -30,6 +30,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @DisplayName("주문 통합 테스트")
 class OrderIntegrationTest extends BaseIntegrationTest {
@@ -54,6 +55,9 @@ class OrderIntegrationTest extends BaseIntegrationTest {
     
     @Autowired
     private OrderRepository orderRepository;
+    
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Nested
     @DisplayName("성공 시나리오 테스트")
@@ -254,9 +258,9 @@ class OrderIntegrationTest extends BaseIntegrationTest {
                     .build()
             );
 
-            // 4. 사용자 쿠폰 생성
+            // 4. 이미 사용된 쿠폰 생성
             UserCoupon createdUserCoupon = UserCoupon.create(couponPolicy.getId(), user.getId());
-
+            createdUserCoupon = createdUserCoupon.useCoupon();
             UserCoupon userCoupon = userCouponRepository.insertOrUpdate(createdUserCoupon);
 
             // 5. 주문 요청 생성
@@ -268,9 +272,6 @@ class OrderIntegrationTest extends BaseIntegrationTest {
                     new OrderItemCommand(productB.getId(), 1)
                 )
             );
-
-            // 6. 주문 및 쿠폰 사용 성공
-            var orderResult = orderFacade.placeOrderWithPayment(command);
 
             // when & then
             assertThatThrownBy(() -> orderFacade.placeOrderWithPayment(command))
@@ -366,10 +367,10 @@ class OrderIntegrationTest extends BaseIntegrationTest {
         @DisplayName("주문 처리 중 예외 발생시 모든 변경사항이 롤백된다")
         void 주문_처리_중_예외_발생시_모든_변경사항이_롤백된다() {
             // given
-            // 1. 사용자 생성 - 잔액 20,000원
+            // 1. 사용자 생성 - 잔액 5,000원 (부족한 금액)
             User user = userRepository.insertOrUpdate(
                 User.builder()
-                    .balance(BigDecimal.valueOf(20_000))
+                    .balance(BigDecimal.valueOf(5_000))
                     .build()
             );
 
@@ -381,27 +382,12 @@ class OrderIntegrationTest extends BaseIntegrationTest {
                     .build()
             );
 
-            // 3. 쿠폰 정책 생성 - 10% 할인, 총 100개, 잔여 50개
-            CouponPolicy couponPolicy = couponPolicyRepository.insertOrUpdate(
-                CouponPolicy.builder()
-                    .discountRate(BigDecimal.valueOf(0.1))
-                    .totalCount(100)
-                    .remainingCount(50)
-                    .build()
-            );
-
-            // 4. 이미 사용된 쿠폰 생성(예외 발생)
-            UserCoupon createdUserCoupon = UserCoupon.create(couponPolicy.getId(), user.getId());
-            UserCoupon userCoupon = userCouponRepository.insertOrUpdate(createdUserCoupon);
-            UserCoupon usedCoupon = userCoupon.useCoupon();
-            userCouponRepository.insertOrUpdate(usedCoupon);
-
-            // 5. 주문 요청 생성
+            // 3. 쿠폰 없이 주문 요청 생성
             CreateOrderCommand command = new CreateOrderCommand(
                 user.getId(),
-                userCoupon.getId(),
+                null,
                 List.of(
-                    new OrderItemCommand(product.getId(), 2)
+                    new OrderItemCommand(product.getId(), 3)
                 )
             );
 
@@ -410,34 +396,35 @@ class OrderIntegrationTest extends BaseIntegrationTest {
             Integer 초기_재고 = product.getStock();
             int 초기_주문수 = orderRepository.findAllByUserId(user.getId()).size();
 
-
             // when
             assertThatThrownBy(() -> orderFacade.placeOrderWithPayment(command))
-                .isInstanceOf(CouponDomainException.AlreadyUsedCouponException.class);
-
+                .isInstanceOf(UserDomainException.InsufficientBalanceException.class);
 
             // then
-            // 롤백 검증
-            assertAll(
-                // 사용자 잔액이 원래대로
-                () -> {
-                    User rollbackUser = userRepository.findById(user.getId()).orElseThrow();
-                    assertThat(rollbackUser.getBalance()).isEqualByComparingTo(초기_잔액);
-                },
+            // 새로운 트랜잭션에서 롤백 검증
+            transactionTemplate.execute(status -> {
+                User rollbackUser = userRepository.findById(user.getId()).orElseThrow();
+                Product rollbackProduct = productRepository.findById(product.getId()).orElseThrow();
+                int 현재_주문수 = orderRepository.findAllByUserId(user.getId()).size();
 
-                // 상품 재고가 원래대로
-                () -> {
-                    Product rollbackProduct = productRepository.findById(product.getId()).orElseThrow();
-                    assertThat(rollbackProduct.getStock()).isEqualTo(초기_재고);
-                },
+                assertAll(
+                    // 사용자 잔액이 원래대로
+                    () -> {
+                        assertThat(rollbackUser.getBalance()).isEqualByComparingTo(초기_잔액);
+                    },
 
-                // 주문이 생성되지 않음
-                () -> {
-                    int 현재_주문수 = orderRepository.findAllByUserId(user.getId()).size();
-                    assertThat(현재_주문수).isEqualTo(초기_주문수);
-                }
-            );
+                    // 상품 재고가 원래대로
+                    () -> {
+                        assertThat(rollbackProduct.getStock()).isEqualTo(초기_재고);
+                    },
 
+                    // 주문이 생성되지 않음
+                    () -> {
+                        assertThat(현재_주문수).isEqualTo(초기_주문수);
+                    }
+                );
+                return null;
+            });
         }
     }
 }

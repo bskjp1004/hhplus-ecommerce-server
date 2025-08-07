@@ -12,16 +12,18 @@ public class UserCoupon {
     private final long userId;
     private final LocalDateTime issuedAt;
     private final CouponStatus status;
+    private final Long version;
 
     @Builder
     private UserCoupon(long id, long couponPolicyId, long userId,
-        LocalDateTime issuedAt, CouponStatus status
+        LocalDateTime issuedAt, CouponStatus status, Long version
     ){
         this.id = id;
         this.couponPolicyId = couponPolicyId;
         this.userId = userId;
         this.issuedAt = issuedAt;
         this.status = status;
+        this.version = version;
     }
 
     public static UserCoupon create(long couponPolicyId, long userId){
@@ -48,6 +50,7 @@ public class UserCoupon {
             .userId(this.userId)
             .issuedAt(this.issuedAt)
             .status(CouponStatus.USED)
+            .version(this.version)
             .build();
     }
 }

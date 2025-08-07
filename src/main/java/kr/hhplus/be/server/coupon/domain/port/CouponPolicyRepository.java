@@ -4,6 +4,6 @@ import kr.hhplus.be.server.coupon.domain.CouponPolicy;
 import java.util.Optional;
 
 public interface CouponPolicyRepository {
-    Optional<CouponPolicy> findById(long couponPolicyId);
+    Optional<CouponPolicy> findById(long id);
     CouponPolicy insertOrUpdate(CouponPolicy couponPolicy);
 }
