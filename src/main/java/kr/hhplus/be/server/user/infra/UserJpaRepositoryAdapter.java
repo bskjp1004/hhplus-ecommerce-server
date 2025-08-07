@@ -1,10 +1,12 @@
 package kr.hhplus.be.server.user.infra;
 
+import jakarta.persistence.LockModeType;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.port.UserRepository;
 import kr.hhplus.be.server.user.infra.entity.UserJpaEntity;
 import kr.hhplus.be.server.user.infra.port.UserJpaRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,7 +19,7 @@ public class UserJpaRepositoryAdapter implements UserRepository {
 
     @Override
     public Optional<User> findById(long userId) {
-        return jpaRepository.findById(userId)
+        return jpaRepository.findByIdWithLock(userId)
             .map(UserJpaEntity::toDomain);
     }
 
