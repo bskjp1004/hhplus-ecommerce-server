@@ -1,18 +1,18 @@
 # DB 성능 최적화 보고서
 
----
+
 ## 조회 성능 저하 기능 식별
 
----
+
 1. 최근 3일간 가장 많이 팔린 상위 5개 상품 조회 
 2. 특정 유저의 주문 조회 
 3. 특정 유저의 잔액 내역 조회
 
 ## 쿼리 실행계획 기반 문제 분석
 
----
+
 ### 1. 최근 3일간 가장 많이 팔린 상위 5개 상품 조회
-![image](./step08_1.png)
+![image](step08_1.png)
 
 ```sql
 // 주문 테이블 인덱스
@@ -25,7 +25,7 @@ CREATE INDEX idx_order_item_order_id_product_id ON order_item (order_id, product
   - `type`이 *ALL*이 아니고, `key`가 *NULL*이 아니지만 `Extra`에서 *Using temporary* 발생
 
 ### 2. 특정 유저의 주문 조회
-![image](./step08_2.png)
+![image](step08_2.png)
 ```
 // 주문 테이블 인덱스
 CREATE INDEX idx_order_ordered_at_desc ON `order` (ordered_at DESC);
@@ -37,7 +37,7 @@ CREATE INDEX idx_order_item_order_id_product_id ON order_item (order_id, product
 
 
 ### 3. 특정 유저의 잔액 내역 조회
-![image](./step08_3.png)
+![image](step08_3.png)
 ```
 // 유저 테이블 인덱스
 없음
@@ -49,7 +49,7 @@ CREATE INDEX idx_order_item_order_id_product_id ON order_item (order_id, product
 
 ## 인덱스/쿼리 재설계 및 개선안 도출
 
----
+
 ### 1. 최근 3일간 가장 많이 팔린 상위 5개 상품 조회
 
 - *Using temporary* 개선은 현재 학습용 이커머스 서버에서는 불필요하다고 판단
