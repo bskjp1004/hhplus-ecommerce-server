@@ -10,7 +10,7 @@ import java.util.Optional;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
-import kr.hhplus.be.server.product.application.dto.ProductResult;
+import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ public class ProductServiceTest {
             Mockito.when(productRepository.findById(productId))
                 .thenReturn(Optional.of(mockProduct));
 
-            ProductResult product = productService.getProduct(productId);
+            ProductResponseDto product = productService.getProduct(productId);
 
             assertAll(
                 ()->assertThat(product).isNotNull(),

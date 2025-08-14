@@ -13,10 +13,9 @@ public class User {
 
     private final long id;
     private final BigDecimal balance;
-    private final Long version;
 
     public static User empty(){
-        return new User(0, BigDecimal.ZERO, 1L);
+        return new User(0, BigDecimal.ZERO);
     }
 
     public User chargeBalance(BigDecimal amount) {
@@ -29,7 +28,7 @@ public class User {
         if (newBalance.compareTo(MAX_BALANCE) > 0){
             throw new UserDomainException.ExceedMaxBalanceException();
         }
-        return new User(this.id, newBalance, this.version);
+        return new User(this.id, newBalance);
     }
 
     public User useBalance(BigDecimal amount){
@@ -42,6 +41,6 @@ public class User {
         if (newBalance.compareTo(MIN_BALANCE) < 0){
             throw new UserDomainException.InsufficientBalanceException();
         }
-        return new User(this.id, newBalance, this.version);
+        return new User(this.id, newBalance);
     }
 }

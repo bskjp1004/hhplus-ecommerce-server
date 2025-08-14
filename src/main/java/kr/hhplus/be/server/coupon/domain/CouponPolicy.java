@@ -30,13 +30,4 @@ public class CouponPolicy {
     public boolean canIssue() {
         return remainingCount > 0;
     }
-
-    public CouponPolicy issue(){
-        return CouponPolicy.builder()
-            .id(this.id)
-            .discountRate(this.discountRate)
-            .totalCount(this.totalCount)
-            .remainingCount(this.remainingCount - 1)
-            .build();
-    }
 }

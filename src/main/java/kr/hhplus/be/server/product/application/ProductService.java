@@ -1,18 +1,14 @@
 package kr.hhplus.be.server.product.application;
 
-import java.math.BigDecimal;
 import java.util.List;
 import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
-import kr.hhplus.be.server.product.application.dto.ProductInfoResult;
-import kr.hhplus.be.server.product.application.dto.ProductResult;
+import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -32,27 +28,14 @@ public class ProductService {
         return products;
     }
 
-    @Transactional(readOnly = true)
-    public ProductResult getProduct(long productId) {
+    public ProductResponseDto getProduct(long productId){
         return productRepository
             .findById(productId)
-            .map(ProductResult::from )
+            .map(ProductResponseDto::from )
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    @Cacheable(
-        value = "products",
-        key = "#productId",
-        unless = "#result == null"
-    )
-    @Transactional(readOnly = true)
-    public ProductInfoResult getProductInfo(long productId) {
-        return productRepository.findById(productId)
-            .map(ProductInfoResult::from)
-            .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public Product decreaseProductStock(OrderItemCommand command) {
         Product originalProduct = productRepository.findById(command.productId())
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -64,25 +47,10 @@ public class ProductService {
         return persistedProduct;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public List<Product> decreaseProductStocks(List<OrderItemCommand> commands) {
         return commands.stream()
-            .sorted((a, b) -> Long.compare(a.productId(), b.productId()))
             .map(this::decreaseProductStock)
             .toList();
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public BigDecimal calculateTotalAmount(List<OrderItemCommand> orderItemCommands, BigDecimal discountRate) {
-        BigDecimal totalPrice = orderItemCommands.stream()
-            .sorted((a, b) -> Long.compare(a.productId(), b.productId()))
-            .map(orderItemCommand -> {
-                Product product = productRepository.findById(orderItemCommand.productId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
-                return product.getPrice().multiply(BigDecimal.valueOf(orderItemCommand.quantity()));
-            })
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        return totalPrice.multiply(BigDecimal.ONE.subtract(discountRate));
     }
 }

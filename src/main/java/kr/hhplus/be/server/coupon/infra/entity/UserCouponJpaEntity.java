@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import kr.hhplus.be.server.coupon.domain.CouponStatus;
 import kr.hhplus.be.server.coupon.domain.UserCoupon;
@@ -42,9 +41,6 @@ public class UserCouponJpaEntity {
     @Enumerated(EnumType.STRING)
     private CouponStatus status;
 
-    @Version
-    private Long version = 0L;
-
     public UserCoupon toDomain(){
         return UserCoupon.builder()
             .id(this.id)
@@ -52,20 +48,16 @@ public class UserCouponJpaEntity {
             .userId(this.userId)
             .issuedAt(this.issuedAt)
             .status(this.status)
-            .version(this.version)
             .build();
     }
 
     public static UserCouponJpaEntity fromDomain(UserCoupon userCoupon){
-        UserCouponJpaEntity entity = new UserCouponJpaEntity();
-        entity.setId(userCoupon.getId());
-        entity.setCouponPolicyId(userCoupon.getCouponPolicyId());
-        entity.setUserId(userCoupon.getUserId());
-        entity.setIssuedAt(userCoupon.getIssuedAt());
-        entity.setStatus(userCoupon.getStatus());
-        if (userCoupon.getVersion() != null) {
-            entity.setVersion(userCoupon.getVersion());
-        }
-        return entity;
+        return new UserCouponJpaEntity(
+            userCoupon.getId(),
+            userCoupon.getCouponPolicyId(),
+            userCoupon.getUserId(),
+            userCoupon.getIssuedAt(),
+            userCoupon.getStatus()
+        );
     }
 }
