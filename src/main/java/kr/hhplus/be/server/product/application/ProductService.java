@@ -10,6 +10,7 @@ import kr.hhplus.be.server.product.domain.port.ProductRepository;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,18 @@ public class ProductService {
         return productRepository
             .findById(productId)
             .map(ProductResult::from )
+            .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @Cacheable(
+        value = "products",
+        key = "#productId",
+        unless = "#result == null"
+    )
+    @Transactional(readOnly = true)
+    public ProductInfoResult getProductInfo(long productId) {
+        return productRepository.findById(productId)
+            .map(ProductInfoResult::from)
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
