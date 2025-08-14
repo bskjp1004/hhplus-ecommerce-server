@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.order.infra;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.port.OrderRepository;
@@ -35,5 +36,10 @@ public class OrderJpaRepositoryAdapter implements OrderRepository {
         OrderJpaEntity entity = OrderJpaEntity.fromDomain(order);
         OrderJpaEntity savedEntity = jpaRepository.save(entity);
         return savedEntity.toDomain();
+    }
+    
+    @Override
+    public List<Long> findOrderIdsByOrderedAtAfter(LocalDateTime dateTime) {
+        return jpaRepository.findOrderIdsByOrderedAtAfter(dateTime);
     }
 }

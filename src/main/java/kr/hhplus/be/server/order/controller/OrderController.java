@@ -20,7 +20,7 @@ public class OrderController {
     private final OrderFacade orderFacade;
 
     @PostMapping("/order")
-    public ResponseEntity<OrderResult> getProduct(
+    public ResponseEntity<OrderResult> placeOrderWithPayment(
         @RequestBody OrderCreateRequest requestDto
     ) {
         CreateOrderCommand command = new CreateOrderCommand(

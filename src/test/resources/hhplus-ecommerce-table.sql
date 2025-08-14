@@ -1,6 +1,7 @@
 CREATE TABLE user (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '유저ID',
-    balance DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '잔액'
+    balance DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '잔액',
+    version BIGINT NOT NULL COMMENT '버전'
 ) COMMENT='유저';
 
 CREATE TABLE balance_history (
@@ -11,6 +12,8 @@ CREATE TABLE balance_history (
     processed_at DATETIME NOT NULL COMMENT '반영일시',
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 ) COMMENT='잔액이력';
+CREATE INDEX idx_balance_history_user_id_processed_at
+ON balance_history (user_id, processed_at);
 
 CREATE TABLE product (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '상품ID',
@@ -27,8 +30,10 @@ CREATE TABLE `order` (
     discount_rate DECIMAL(5,2) NOT NULL COMMENT '할인율',
     paid_price DECIMAL(10,2) NOT NULL COMMENT '결제금액'
 ) COMMENT='주문';
-CREATE INDEX idx_order_ordered_at_desc
-ON `order` (ordered_at DESC);
+CREATE INDEX idx_order_ordered_at
+ON `order` (ordered_at);
+CREATE INDEX idx_order_user_id
+ON `order` (user_id);
 
 CREATE TABLE order_item (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'PK',
@@ -54,5 +59,6 @@ CREATE TABLE user_coupon (
     user_id BIGINT NOT NULL COMMENT '유저ID',
     issued_at DATETIME NOT NULL COMMENT '발급일시',
     status ENUM('ISSUED', 'USED') NOT NULL COMMENT '쿠폰상태',
+    version BIGINT NOT NULL COMMENT '버전',
     UNIQUE KEY uq_coupon_policy_user (coupon_policy_id, user_id)
 ) COMMENT='유저 쿠폰 소유 및 사용 이력';
