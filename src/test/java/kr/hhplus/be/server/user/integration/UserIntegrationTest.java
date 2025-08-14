@@ -55,7 +55,7 @@ public class UserIntegrationTest extends BaseIntegrationTest {
         @DisplayName("존재하지 않는 유저의 잔액은 충전할 수 없다")
         void 존재하지_않는_유저의_잔액은_충전할_수_없다() {
             // when & then
-            assertThatThrownBy(() -> userService.chargeBalance(1L, BigDecimal.valueOf(10_000)))
+            assertThatThrownBy(() -> userService.chargeBalance(999999L, BigDecimal.valueOf(10_000)))
                 .isInstanceOf(BusinessException.class)
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.USER_NOT_FOUND);

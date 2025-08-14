@@ -53,4 +53,11 @@ public class UserService {
 
         return persistedUser;
     }
+
+    public void validateBalance(long userId, BigDecimal amount) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        
+        user.useBalance(amount);
+    }
 }

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.product.application;
 
+import java.math.BigDecimal;
 import java.util.List;
 import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
 import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
@@ -9,6 +10,7 @@ import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -35,7 +37,7 @@ public class ProductService {
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public Product decreaseProductStock(OrderItemCommand command) {
         Product originalProduct = productRepository.findById(command.productId())
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -47,10 +49,24 @@ public class ProductService {
         return persistedProduct;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<Product> decreaseProductStocks(List<OrderItemCommand> commands) {
         return commands.stream()
+            .sorted((a, b) -> Long.compare(a.productId(), b.productId()))
             .map(this::decreaseProductStock)
             .toList();
+    }
+
+    public BigDecimal calculateTotalAmount(List<OrderItemCommand> orderItemCommands, BigDecimal discountRate) {
+        BigDecimal totalPrice = orderItemCommands.stream()
+            .sorted((a, b) -> Long.compare(a.productId(), b.productId()))
+            .map(orderItemCommand -> {
+                Product product = productRepository.findById(orderItemCommand.productId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+                return product.getPrice().multiply(BigDecimal.valueOf(orderItemCommand.quantity()));
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        return totalPrice.multiply(BigDecimal.ONE.subtract(discountRate));
     }
 }

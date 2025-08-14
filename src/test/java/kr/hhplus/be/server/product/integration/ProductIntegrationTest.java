@@ -58,7 +58,7 @@ public class ProductIntegrationTest extends BaseIntegrationTest {
         @DisplayName("존재하지 않는 상품은 조회할 수 없다")
         void 존재하지_않는_상품은_조회할_수_없다() {
             // when & then
-            assertThatThrownBy(() -> productService.getProduct(1))
+            assertThatThrownBy(() -> productService.getProduct(999999L))
                 .isInstanceOf(BusinessException.class)
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.PRODUCT_NOT_FOUND);
