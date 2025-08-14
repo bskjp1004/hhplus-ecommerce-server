@@ -10,8 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import kr.hhplus.be.server.ServerApplication;
-import kr.hhplus.be.server.TestcontainersConfiguration;
+import kr.hhplus.be.server.BaseConcurrencyTest;
 import kr.hhplus.be.server.coupon.application.CouponService;
 import kr.hhplus.be.server.coupon.domain.CouponPolicy;
 import kr.hhplus.be.server.coupon.domain.UserCoupon;
@@ -28,11 +27,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { ServerApplication.class, TestcontainersConfiguration.class })
-@SpringBootTest
 @DisplayName("쿠폰 동시성 제어 테스트")
-public class CouponConcurrencyControllTest {
+public class CouponConcurrencyControllTest extends BaseConcurrencyTest {
     
     @Autowired
     private CouponService couponService;

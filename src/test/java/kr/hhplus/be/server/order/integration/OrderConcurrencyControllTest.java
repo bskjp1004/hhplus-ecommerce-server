@@ -8,10 +8,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import kr.hhplus.be.server.ServerApplication;
-import kr.hhplus.be.server.TestcontainersConfiguration;
-import kr.hhplus.be.server.coupon.domain.CouponPolicy;
-import kr.hhplus.be.server.coupon.domain.UserCoupon;
+import kr.hhplus.be.server.BaseConcurrencyTest;
 import kr.hhplus.be.server.coupon.domain.port.CouponPolicyRepository;
 import kr.hhplus.be.server.coupon.domain.port.UserCouponRepository;
 import kr.hhplus.be.server.order.application.OrderFacade;
@@ -27,18 +24,12 @@ import kr.hhplus.be.server.user.domain.port.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { ServerApplication.class, TestcontainersConfiguration.class })
-@SpringBootTest
 @DisplayName("주문 동시성 제어 테스트")
-public class OrderConcurrencyControllTest {
+public class OrderConcurrencyControllTest extends BaseConcurrencyTest {
+
     @Autowired
     private OrderFacade orderFacade;
 
@@ -106,15 +97,7 @@ public class OrderConcurrencyControllTest {
                 executor.submit(() -> {
                     try {
                         startLatch.await();
-
-                        transactionTemplate.execute(status -> {
-                            try {
-                                orderFacade.placeOrderWithPayment(command);
-                            } catch (Exception e) {
-                                status.setRollbackOnly();
-                            }
-                            return null;
-                        });
+                        orderFacade.placeOrderWithPayment(command);
                     } catch (Exception e) {
                     } finally {
                         doneLatch.countDown();
@@ -207,14 +190,7 @@ public class OrderConcurrencyControllTest {
                 try {
                     startLatch.await();
 
-                    transactionTemplate.execute(status -> {
-                       try {
-                           orderFacade.placeOrderWithPayment(command1);
-                       } catch (Exception e) {
-                           status.setRollbackOnly();
-                       }
-                       return null;
-                    });
+                    orderFacade.placeOrderWithPayment(command1);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -226,14 +202,7 @@ public class OrderConcurrencyControllTest {
             executor.submit(() -> {
                 try {
                     startLatch.await();
-                    transactionTemplate.execute(status -> {
-                        try {
-                            orderFacade.placeOrderWithPayment(command2);
-                        } catch (Exception e) {
-                            status.setRollbackOnly();
-                        }
-                        return null;
-                    });
+                    orderFacade.placeOrderWithPayment(command2);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {

@@ -1,7 +1,9 @@
 package kr.hhplus.be.server.product.controller;
 
+import java.util.List;
+import kr.hhplus.be.server.product.application.ProductFacade;
 import kr.hhplus.be.server.product.application.ProductService;
-import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
+import kr.hhplus.be.server.product.application.dto.ProductResult;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
-    private final ProductService pointService;
+    private final ProductService productService;
+    private final ProductFacade productFacade;
 
     @GetMapping("{productId}")
-    public ResponseEntity<ProductResponseDto> getProduct(
+    public ResponseEntity<ProductResult> getProduct(
         @PathVariable long productId
     ) {
-        return ResponseEntity.ok(pointService.getProduct(productId));
+        return ResponseEntity.ok(productService.getProduct(productId));
+    }
+
+    @GetMapping("top-selling")
+    public ResponseEntity<List<ProductResult>> getTopSellingProducts(){
+        return ResponseEntity.ok(productFacade.getTopSellingProducts());
     }
 }

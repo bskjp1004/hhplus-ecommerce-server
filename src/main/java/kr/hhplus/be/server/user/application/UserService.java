@@ -11,6 +11,7 @@ import kr.hhplus.be.server.user.domain.port.UserRepository;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -54,10 +55,17 @@ public class UserService {
         return persistedUser;
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void validateBalance(long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         
         user.useBalance(amount);
+    }
+
+    @Transactional(readOnly = true)
+    public User getBalance(long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }
