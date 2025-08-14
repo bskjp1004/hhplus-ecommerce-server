@@ -38,6 +38,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.retry:spring-retry")
 	implementation("org.springframework:spring-aspects")
+	implementation("org.springframework.boot:spring-boot-starter-aop")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+	// Redisson
+	implementation("org.redisson:redisson-spring-boot-starter:3.50.0")
 
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
@@ -51,7 +56,7 @@ dependencies {
 	testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 
 	// Docs
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
 	// Lombok
 	compileOnly("org.projectlombok:lombok:1.18.36")
