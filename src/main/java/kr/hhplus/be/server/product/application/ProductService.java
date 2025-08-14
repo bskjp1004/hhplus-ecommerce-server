@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
 import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
+import kr.hhplus.be.server.product.application.dto.ProductResult;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
 import kr.hhplus.be.server.config.error.BusinessException;
@@ -30,10 +31,11 @@ public class ProductService {
         return products;
     }
 
-    public ProductResponseDto getProduct(long productId){
+    @Transactional(readOnly = true)
+    public ProductResult getProduct(long productId) {
         return productRepository
             .findById(productId)
-            .map(ProductResponseDto::from )
+            .map(ProductResult::from )
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
@@ -57,6 +59,7 @@ public class ProductService {
             .toList();
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public BigDecimal calculateTotalAmount(List<OrderItemCommand> orderItemCommands, BigDecimal discountRate) {
         BigDecimal totalPrice = orderItemCommands.stream()
             .sorted((a, b) -> Long.compare(a.productId(), b.productId()))
