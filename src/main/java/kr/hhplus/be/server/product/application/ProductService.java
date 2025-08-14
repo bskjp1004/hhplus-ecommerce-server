@@ -3,7 +3,7 @@ package kr.hhplus.be.server.product.application;
 import java.math.BigDecimal;
 import java.util.List;
 import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
-import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
+import kr.hhplus.be.server.product.application.dto.ProductInfoResult;
 import kr.hhplus.be.server.product.application.dto.ProductResult;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
