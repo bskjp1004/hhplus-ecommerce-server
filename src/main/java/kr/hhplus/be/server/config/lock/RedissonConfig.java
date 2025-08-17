@@ -21,6 +21,12 @@ public class RedissonConfig {
         this.redisProperties = redisProperties;
     }
 
+    private String scheme() {
+        return redisProperties.getSsl().isEnabled()
+            ? "rediss://"
+            : "redis://";
+    }
+
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redissonClient() {
         Config config = new Config();
@@ -35,16 +41,14 @@ public class RedissonConfig {
                 .setReadMode(ReadMode.MASTER)
                 .setSubscriptionMode(SubscriptionMode.MASTER);
 
-            String scheme = Boolean.TRUE.equals(redisProperties.getSsl()) ? "rediss://" : "redis://";
             List<String> nodesWithScheme = cluster.getNodes().stream()
-                .map(n -> ensureScheme(n, scheme))
-                .collect(Collectors.toList());
+                .map(this::ensureScheme)
+                .toList();
             c.addNodeAddress(nodesWithScheme.toArray(new String[0]));
 
         } else {
-            String scheme = Boolean.TRUE.equals(redisProperties.getSsl()) ? "rediss://" : "redis://";
             SingleServerConfig s = config.useSingleServer()
-                .setAddress(scheme + redisProperties.getHost() + ":" + redisProperties.getPort())
+                .setAddress(scheme() + redisProperties.getHost() + ":" + redisProperties.getPort())
                 .setPassword(redisProperties.getPassword())
                 .setDatabase(redisProperties.getDatabase());
         }
@@ -52,11 +56,8 @@ public class RedissonConfig {
         return Redisson.create(config);
     }
 
-    private static String ensureScheme(String hostPort, String scheme) {
-        String lower = hostPort.toLowerCase();
-        if (lower.startsWith("redis://") || lower.startsWith("rediss://")) {
-            return hostPort;
-        }
-        return scheme + hostPort;
+    private String ensureScheme(String node) {
+        String n = node.toLowerCase();
+        return (n.startsWith("redis://") || n.startsWith("rediss://")) ? node : scheme() + node;
     }
 }
