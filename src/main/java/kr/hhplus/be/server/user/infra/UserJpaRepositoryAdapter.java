@@ -17,7 +17,7 @@ public class UserJpaRepositoryAdapter implements UserRepository {
 
     @Override
     public Optional<User> findById(long userId) {
-        return jpaRepository.findOneById(userId)
+        return jpaRepository.findById(userId)
             .map(UserJpaEntity::toDomain);
     }
 

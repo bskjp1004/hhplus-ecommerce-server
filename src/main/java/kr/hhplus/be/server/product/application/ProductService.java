@@ -3,12 +3,14 @@ package kr.hhplus.be.server.product.application;
 import java.math.BigDecimal;
 import java.util.List;
 import kr.hhplus.be.server.order.application.dto.OrderItemCommand;
-import kr.hhplus.be.server.product.application.dto.ProductResponseDto;
+import kr.hhplus.be.server.product.application.dto.ProductInfoResult;
+import kr.hhplus.be.server.product.application.dto.ProductResult;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.product.domain.port.ProductRepository;
 import kr.hhplus.be.server.config.error.BusinessException;
 import kr.hhplus.be.server.config.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +32,23 @@ public class ProductService {
         return products;
     }
 
-    public ProductResponseDto getProduct(long productId){
+    @Transactional(readOnly = true)
+    public ProductResult getProduct(long productId) {
         return productRepository
             .findById(productId)
-            .map(ProductResponseDto::from )
+            .map(ProductResult::from )
+            .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @Cacheable(
+        value = "products",
+        key = "#productId",
+        unless = "#result == null"
+    )
+    @Transactional(readOnly = true)
+    public ProductInfoResult getProductInfo(long productId) {
+        return productRepository.findById(productId)
+            .map(ProductInfoResult::from)
             .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
@@ -57,6 +72,7 @@ public class ProductService {
             .toList();
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public BigDecimal calculateTotalAmount(List<OrderItemCommand> orderItemCommands, BigDecimal discountRate) {
         BigDecimal totalPrice = orderItemCommands.stream()
             .sorted((a, b) -> Long.compare(a.productId(), b.productId()))

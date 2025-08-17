@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.AccessLevel;
@@ -28,17 +29,24 @@ public class UserJpaEntity {
     @Column(nullable = false)
     private BigDecimal balance;
 
+    @Version
+    private Long version = 0L;
+
     public User toDomain(){
         return User.builder()
             .id(this.id)
             .balance(this.balance)
+            .version(this.version)
             .build();
     }
 
     public static UserJpaEntity fromDomain(User user){
-        return new UserJpaEntity(
-            user.getId(),
-            user.getBalance()
-        );
+        UserJpaEntity entity = new UserJpaEntity();
+        entity.setId(user.getId());
+        entity.setBalance(user.getBalance());
+        if (user.getVersion() != null) {
+            entity.setVersion(user.getVersion());
+        }
+        return entity;
     }
 }

@@ -2,6 +2,8 @@ package kr.hhplus.be.server.order.application;
 
 import java.math.BigDecimal;
 import java.util.List;
+import kr.hhplus.be.server.config.lock.DistributedLock;
+import kr.hhplus.be.server.config.lock.LockType;
 import kr.hhplus.be.server.coupon.application.CouponService;
 import kr.hhplus.be.server.order.application.dto.CreateOrderCommand;
 import kr.hhplus.be.server.order.application.dto.OrderResult;
@@ -22,6 +24,9 @@ public class OrderFacade {
     private final ProductService productService;
     private final UserService userService;
 
+    @DistributedLock(lockType = LockType.ORDER, keys = {
+        "#command.OrderItemCommands().![productId]"
+    })
     @Transactional
     public OrderResult placeOrderWithPayment(CreateOrderCommand command) {
         // 1. 쿠폰 처리
