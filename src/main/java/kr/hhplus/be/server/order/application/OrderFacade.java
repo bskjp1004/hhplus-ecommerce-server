@@ -25,7 +25,6 @@ public class OrderFacade {
     private final UserService userService;
 
     @DistributedLock(lockType = LockType.ORDER, keys = {
-        "#command.userId()",
         "#command.OrderItemCommands().![productId]"
     })
     @Transactional
