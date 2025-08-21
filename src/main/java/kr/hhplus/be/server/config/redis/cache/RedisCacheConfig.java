@@ -1,9 +1,10 @@
-package kr.hhplus.be.server.config.cache;
+package kr.hhplus.be.server.config.redis.cache;
+
+import static kr.hhplus.be.server.config.redis.RedisKey.CACHE_PRODUCT_TOP_SELLING_3_DAYS_TOP_5;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -17,7 +18,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -97,9 +97,9 @@ public class RedisCacheConfig {
         // 캐시별 개별 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         
-        // 인기 상품 캐시: 3시간 TTL
-        cacheConfigurations.put("topSellingProducts", 
-            defaultConfig.entryTtl(Duration.ofHours(3)));
+        // 인기 상품 캐시: 10분 TTL
+        cacheConfigurations.put(CACHE_PRODUCT_TOP_SELLING_3_DAYS_TOP_5.key(),
+            defaultConfig.entryTtl(CACHE_PRODUCT_TOP_SELLING_3_DAYS_TOP_5.ttlFromNow()));
         
         // 상품 정보 캐시: 24시간 TTL
         cacheConfigurations.put("products", 

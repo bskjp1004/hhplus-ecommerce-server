@@ -5,5 +5,6 @@ import java.util.Optional;
 
 public interface CouponPolicyRepository {
     Optional<CouponPolicy> findById(long id);
+    Optional<CouponPolicy> findByIdWithLock(long id);
     CouponPolicy insertOrUpdate(CouponPolicy couponPolicy);
 }
