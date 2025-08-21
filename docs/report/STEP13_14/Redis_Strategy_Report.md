@@ -19,7 +19,7 @@
 - 조회한 데이터를 캐시(`cache:product:top_selling`)에 저장하기
 - 스케줄러를 활용해 정각 10분마다 **인기 상품 조회** 캐시를 갱신하여 실시간 인기 상품 데이터 반영
 
-```json
+```java
 // 당일 상품 실시간 랭킹 (ZSET) - TTL: 생성일 기준 D+3 00:10 만료
 zs:product:rank:2025-08-18
 
@@ -171,7 +171,7 @@ public class ProductCacheScheduler {
 - 순위 안의 도달한 요청은 비동기로 DB에 쿠폰 발행 요청
 - 사용자는 비동기 응답으로 쿠폰 발행 상태를 확인함
 
-```json
+```java
 // 쿠폰 발급 큐 (ZSET) - TTL: 3분
 zs:coupon:request:queue:{couponPolicyId}
 
