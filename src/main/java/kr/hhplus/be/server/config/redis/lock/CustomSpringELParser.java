@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config.lock;
+package kr.hhplus.be.server.config.redis.lock;
 
 import java.util.ArrayList;
 import java.util.Collection;

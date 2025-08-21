@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config.lock;
+package kr.hhplus.be.server.config.redis.lock;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class DistributedLockAop {
 
     private final RedissonClient redissonClient;
 
-    @Around("@annotation(kr.hhplus.be.server.config.lock.DistributedLock)")
+    @Around("@annotation(kr.hhplus.be.server.config.redis.lock.DistributedLock)")
     public Object lock(final ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
