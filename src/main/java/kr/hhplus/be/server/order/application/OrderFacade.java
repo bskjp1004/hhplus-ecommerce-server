@@ -1,9 +1,14 @@
 package kr.hhplus.be.server.order.application;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import kr.hhplus.be.server.config.lock.DistributedLock;
-import kr.hhplus.be.server.config.lock.LockType;
+import kr.hhplus.be.server.config.redis.RedisKey;
+import kr.hhplus.be.server.config.redis.lock.DistributedLock;
+import kr.hhplus.be.server.config.redis.lock.LockType;
 import kr.hhplus.be.server.coupon.application.CouponService;
 import kr.hhplus.be.server.order.application.dto.CreateOrderCommand;
 import kr.hhplus.be.server.order.application.dto.OrderResult;
@@ -12,9 +17,12 @@ import kr.hhplus.be.server.product.application.ProductService;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.user.application.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderFacade {
@@ -23,6 +31,8 @@ public class OrderFacade {
     private final CouponService couponService;
     private final ProductService productService;
     private final UserService userService;
+    private final RedisTemplate<String, Object> redisTemplate;
+
 
     @DistributedLock(lockType = LockType.ORDER, keys = {
         "#command.OrderItemCommands().![productId]"
@@ -51,7 +61,34 @@ public class OrderFacade {
         // 6. 유저 잔액 차감 (이미 검증됨)
         userService.useBalance(command.userId(), orderResult.paidPrice());
 
+        // 7. Redis에 날짜별 상품 랭킹 저장
+        addProductScoreToRedis(orderItems);
+
         return orderResult;
+    }
+
+    private void addProductScoreToRedis(List<OrderItem> orderItems){
+        LocalDateTime today = LocalDateTime.now();
+        String todayStr = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String dailyKey = RedisKey.PRODUCT_RANK_DAILY.key(todayStr);
+        Duration ttl = RedisKey.PRODUCT_RANK_DAILY.ttlFromNow(today);
+
+        try {
+            if (!redisTemplate.hasKey(dailyKey)) {
+                redisTemplate.expire(dailyKey, ttl);
+            }
+
+            for (OrderItem item : orderItems) {
+                redisTemplate.opsForZSet()
+                    .incrementScore(dailyKey,
+                        item.getProductId(),
+                        item.getQuantity());
+            }
+
+        } catch (Exception e) {
+            log.warn("Failed to update Redis: {}", e.getMessage());
+        }
+
     }
 
 }

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config.lock;
+package kr.hhplus.be.server.config.redis.lock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

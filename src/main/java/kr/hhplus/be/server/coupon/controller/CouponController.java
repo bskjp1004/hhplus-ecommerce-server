@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.coupon.controller;
 
 import kr.hhplus.be.server.coupon.application.CouponService;
-import kr.hhplus.be.server.coupon.application.dto.UserCouponResponseDto;
+import kr.hhplus.be.server.coupon.application.dto.CouponQueueResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,10 +18,10 @@ public class CouponController {
     private final CouponService couponService;
 
     @PostMapping("{userId}")
-    public ResponseEntity<UserCouponResponseDto> issueLimitedCoupon (
+    public ResponseEntity<CouponQueueResponseDto> issueLimitedCoupon (
         @PathVariable long userId,
         @RequestBody long couponPolicyId
     ) {
-        return ResponseEntity.ok(couponService.issueLimitedCoupon(userId, couponPolicyId));
+        return ResponseEntity.ok(couponService.issueLimitedCouponFromRedis(userId, couponPolicyId));
     }
 }

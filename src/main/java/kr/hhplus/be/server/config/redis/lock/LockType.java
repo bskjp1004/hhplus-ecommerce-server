@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.config.lock;
+package kr.hhplus.be.server.config.redis.lock;
 
 public enum LockType {
     ORDER("ORDER"),
