@@ -13,11 +13,14 @@ import kr.hhplus.be.server.coupon.application.CouponService;
 import kr.hhplus.be.server.order.application.dto.CreateOrderCommand;
 import kr.hhplus.be.server.order.application.dto.OrderResult;
 import kr.hhplus.be.server.order.domain.OrderItem;
+import kr.hhplus.be.server.order.domain.event.OrderPlacedEvent;
+import kr.hhplus.be.server.order.domain.event.OrderPlacedEvent.Item;
 import kr.hhplus.be.server.product.application.ProductService;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.user.application.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +35,7 @@ public class OrderFacade {
     private final ProductService productService;
     private final UserService userService;
     private final RedisTemplate<String, Object> redisTemplate;
-
+    private final ApplicationEventPublisher events;
 
     @DistributedLock(lockType = LockType.ORDER, keys = {
         "#command.OrderItemCommands().![productId]"
@@ -63,6 +66,22 @@ public class OrderFacade {
 
         // 7. Redis에 날짜별 상품 랭킹 저장
         addProductScoreToRedis(orderItems);
+
+        // 8. 주문정보 외부 플랫폼 전송 이벤트 발행
+        var items = orderResult.orderItems().stream()
+            .map(oi -> new Item(
+                oi.productId(),
+                oi.quantity(),
+                oi.unitPrice()
+            ))
+            .toList();
+
+        events.publishEvent(OrderPlacedEvent.of(
+            orderResult.id(),
+            orderResult.userId(),
+            orderResult.paidPrice(),
+            items
+        ));
 
         return orderResult;
     }
