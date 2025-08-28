@@ -12,15 +12,37 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class AsyncConfig {
 
     @Bean(name = "asyncExecutor")
-    @Primary  // 기본 TaskExecutor로 지정
+    @Primary
     public TaskExecutor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(50);        // 10 → 50
-        executor.setMaxPoolSize(1000);       // 50 → 1000 
-        executor.setQueueCapacity(2000);     // 100 → 2000
+        executor.setCorePoolSize(50);
+        executor.setMaxPoolSize(1000);
+        executor.setQueueCapacity(2000);
         executor.setThreadNamePrefix("Async-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "orderEventExecutor")
+    public ThreadPoolTaskExecutor orderEventExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setThreadNamePrefix("order-event-");
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(500);
+        executor.setKeepAliveSeconds(60);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        executor.setTaskDecorator(r -> {
+            var m = org.slf4j.MDC.getCopyOfContextMap();
+            return () -> {
+                if (m != null) org.slf4j.MDC.setContextMap(m);
+                try { r.run(); } finally { org.slf4j.MDC.clear(); }
+            };
+        });
+        executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         return executor;
     }
