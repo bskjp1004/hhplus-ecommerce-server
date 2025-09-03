@@ -40,6 +40,7 @@ dependencies {
 	implementation("org.springframework:spring-aspects")
 	implementation("org.springframework.boot:spring-boot-starter-aop")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 
 	// Redisson
 	implementation("org.redisson:redisson-spring-boot-starter:3.50.0")

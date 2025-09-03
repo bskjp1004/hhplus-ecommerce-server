@@ -27,6 +27,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OrderFacadeTest 테스트")
@@ -43,6 +45,12 @@ public class OrderFacadeTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private ApplicationEventPublisher events;
 
     @InjectMocks
     private OrderFacade orderFacade;
