@@ -57,9 +57,8 @@ public class KafkaConfig {
     public NewTopic couponIssueTopic() {
         return TopicBuilder.name(couponIssueTopic)
             .partitions(10)
-            .replicas(1)                          // EmbeddedKafka 호환 (단일 브로커)
+            .replicas(1) // 테스트 EmbeddedKafka 호환 (단일 브로커)
             .config("retention.ms", "604800000")  // 7일
-            //.config("min.insync.replicas", "1")   // EmbeddedKafka 호환
             .config("cleanup.policy", "delete")   // 정리 정책
             .build();
     }
