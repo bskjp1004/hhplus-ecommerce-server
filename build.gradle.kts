@@ -45,6 +45,9 @@ dependencies {
 	// Redisson
 	implementation("org.redisson:redisson-spring-boot-starter:3.50.0")
 
+	// Kafka
+	implementation("org.springframework.kafka:spring-kafka")
+
     // DB
 	runtimeOnly("com.mysql:mysql-connector-j")
 
@@ -53,6 +56,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mysql")
+	testImplementation("org.testcontainers:kafka")
+	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 
