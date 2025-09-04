@@ -13,8 +13,6 @@ import kr.hhplus.be.server.coupon.application.CouponService;
 import kr.hhplus.be.server.order.application.dto.CreateOrderCommand;
 import kr.hhplus.be.server.order.application.dto.OrderResult;
 import kr.hhplus.be.server.order.domain.OrderItem;
-import kr.hhplus.be.server.order.domain.event.OrderPlacedEvent;
-import kr.hhplus.be.server.order.domain.event.OrderPlacedEvent.Item;
 import kr.hhplus.be.server.product.application.ProductService;
 import kr.hhplus.be.server.product.domain.Product;
 import kr.hhplus.be.server.user.application.UserService;
@@ -67,21 +65,7 @@ public class OrderFacade {
         // 7. Redis에 날짜별 상품 랭킹 저장
         addProductScoreToRedis(orderItems);
 
-        // 8. 주문정보 외부 플랫폼 전송 이벤트 발행
-        var items = orderResult.orderItems().stream()
-            .map(oi -> new Item(
-                oi.productId(),
-                oi.quantity(),
-                oi.unitPrice()
-            ))
-            .toList();
-
-        events.publishEvent(OrderPlacedEvent.of(
-            orderResult.id(),
-            orderResult.userId(),
-            orderResult.paidPrice(),
-            items
-        ));
+        events.publishEvent(orderResult);
 
         return orderResult;
     }
