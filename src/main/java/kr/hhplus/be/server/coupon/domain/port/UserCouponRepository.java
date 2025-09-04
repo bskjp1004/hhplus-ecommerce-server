@@ -8,4 +8,5 @@ public interface UserCouponRepository {
     Optional<UserCoupon> findById(long id);
     UserCoupon insertOrUpdate(UserCoupon userCoupon);
     List<UserCoupon> findAllByCouponPolicyId(long couponPolicyId);
+    Optional<UserCoupon> findByUserIdAndCouponPolicyId(long userId, long couponPolicyId);
 }

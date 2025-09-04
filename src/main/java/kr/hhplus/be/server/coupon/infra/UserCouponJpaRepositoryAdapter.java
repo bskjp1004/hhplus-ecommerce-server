@@ -36,4 +36,10 @@ public class UserCouponJpaRepositoryAdapter implements UserCouponRepository {
             .map(UserCouponJpaEntity::toDomain)
             .toList();
     }
+    
+    @Override
+    public Optional<UserCoupon> findByUserIdAndCouponPolicyId(long userId, long couponPolicyId) {
+        return jpaRepository.findByUserIdAndCouponPolicyId(userId, couponPolicyId)
+            .map(UserCouponJpaEntity::toDomain);
+    }
 }
