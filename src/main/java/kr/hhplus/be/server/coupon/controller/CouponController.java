@@ -16,10 +16,10 @@ public class CouponController {
     private final CouponService couponService;
     private final CouponKafkaProducer couponKafkaProducer;
 
-    @PostMapping("{userId}")
+    @PostMapping("{couponPolicyId}")
     public ResponseEntity<CouponQueueResponseDto> issueLimitedCoupon (
-        @PathVariable long userId,
-        @RequestBody long couponPolicyId
+        @PathVariable long couponPolicyId,
+        @RequestBody long userId
     ) {
         CouponQueueResponseDto response = couponKafkaProducer.publishCouponIssueRequest(userId, couponPolicyId);
         return ResponseEntity.accepted().body(response);
